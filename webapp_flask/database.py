@@ -9,8 +9,10 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "database", "app.db")
-
+if os.environ.get("VERCEL"):
+    DB_PATH = "/tmp/app.db"
+else:
+    DB_PATH = os.path.join(BASE_DIR, "database", "app.db")
 
 def get_db():
     """Open a new database connection with row access by column name."""
