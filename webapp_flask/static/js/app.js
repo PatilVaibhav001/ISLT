@@ -1049,6 +1049,11 @@ if (mobileMenuBtn) {
     mobileMenuBtn.addEventListener("click", () => {
         const sidebar = document.querySelector(".sidebar");
         sidebar.classList.toggle("mobile-open");
+        if (sidebar.classList.contains("mobile-open")) {
+            document.body.classList.add("no-scroll");
+        } else {
+            document.body.classList.remove("no-scroll");
+        }
     });
 }
 document.querySelectorAll(".nav-item").forEach(item => {
@@ -1056,6 +1061,7 @@ document.querySelectorAll(".nav-item").forEach(item => {
         const sidebar = document.querySelector(".sidebar");
         if (window.innerWidth <= 900 && sidebar.classList.contains("mobile-open")) {
             sidebar.classList.remove("mobile-open");
+            document.body.classList.remove("no-scroll");
         }
     });
 });
