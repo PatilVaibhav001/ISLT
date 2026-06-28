@@ -33,6 +33,19 @@ ASSETS_DIR = os.path.join(BASE_DIR, "static", "images")
 
 db.init_db()
 
+@app.before_request
+def restore_vercel_user():
+    """
+    Vercel wipes the /tmp SQLite database on cold starts.
+    If a user is logged in (has a session cookie) but their account was wiped from the DB,
+    this will silently recreate their account so they aren't forced to log in again.
+    """
+    if "user_id" in session and "username" in session:
+        user = db.get_user_by_id(session["user_id"])
+        if not user:
+            new_user = db.create_user(session["username"], "vercel_restored_password")
+            if new_user:
+                session["user_id"] = new_user["id"]
 
 # ───────────────────────── HELPERS ─────────────────────────
 
