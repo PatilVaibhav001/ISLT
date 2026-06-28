@@ -1,0 +1,39 @@
+<!-- ═══════════════════════ AUTH MODAL ═══════════════════════ -->
+<div class="auth-shell" id="auth-shell" style="display:none;">
+    <div class="auth-card" style="position: relative;">
+        <button id="auth-close-btn" class="auth-close-btn" aria-label="Close" style="position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); transition: color 0.2s ease;">&times;</button>
+        <div class="auth-brand">
+            <div class="brand-title">SignTalk Pro</div>
+            <div class="brand-subtitle">Sign Language Translator</div>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="auth-tab-login" data-form="login">Login</button>
+            <button class="auth-tab" id="auth-tab-register" data-form="register">Register</button>
+        </div>
+
+        <form class="auth-form active" id="form-login">
+            <label class="auth-label">Username</label>
+            <input type="text" class="auth-input" id="login-username" autocomplete="username" required>
+            <label class="auth-label">Password</label>
+            <input type="password" class="auth-input" id="login-password" autocomplete="current-password" required>
+            <div class="auth-error" id="login-error"></div>
+            <button type="submit" class="btn-primary btn-block">Log In</button>
+        </form>
+
+        <form class="auth-form" id="form-register">
+            <label class="auth-label">Choose a username</label>
+            <input type="text" class="auth-input" id="register-username" autocomplete="username" required
+                minlength="3">
+            <label class="auth-label">Choose a password</label>
+            <input type="password" class="auth-input" id="register-password" autocomplete="new-password" required
+                minlength="4">
+            <div class="auth-error" id="register-error"></div>
+            <button type="submit" class="btn-primary btn-block">Create Account</button>
+        </form>
+
+        <button class="auth-guest-btn" id="btn-guest">Continue as Guest</button>
+        <p class="auth-guest-note">Guests can translate, but History, Favorites, Achievements and Settings won't be
+            saved.</p>
+    </div>
+</div>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignTalk Pro — Voice to Sign Language Translator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Outfit:wght@100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: {
+                preflight: false,
+            }
+        }
+    </script>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='favicon/site.webmanifest') }}">
+</head>
+
+<body>
+
+    <!-- ═══════════════════════ LANDING SCREEN ═══════════════════════ -->
+    <div id="landing-shell" class="min-h-screen bg-white text-black flex flex-col font-sans" style="display:flex;">
+        <style>
+            #landing-shell,
+            #landing-shell * {
+                font-family: 'Outfit', sans-serif;
+            }
+
+            #landing-shell ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            #landing-shell a {
+                text-decoration: none;
+                color: inherit;
+            }
+        </style>
+
+        <section
+            class="pb-32 md:pb-44 bg-[url('https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/hero/bg-with-grid.png')] bg-cover bg-center bg-no-repeat text-slate-800 text-sm flex-grow">
+            <nav
+                class="flex items-center justify-between p-4 md:px-16 lg:px-24 xl:px-32 border-b border-black/10 w-full bg-white relative">
+                <a href="#">
+                    <img src="{{ url_for('static', filename='images/others/logo.png') }}" alt="SignTalk Pro Logo"
+                        class="h-8 md:h-10">
+                </a>
+                <ul id="menu"
+                    class="max-md:absolute max-md:h-screen max-md:z-50 max-md:w-full max-md:top-0 max-md:-left-full transition-all duration-300 max-md:backdrop-blur max-md:bg-white/70 text-base flex flex-col md:flex-row items-center justify-center gap-8 font-medium text-slate-600">
+                    <li onclick="closeNavbar()" class="hover:text-blue-600 transition-colors"><a href="#">Home</a></li>
+                    <li onclick="closeNavbar()" class="hover:text-blue-600 transition-colors"><a href="#">Products</a>
+                    </li>
+                    <li onclick="closeNavbar()" class="hover:text-blue-600 transition-colors"><a href="#">Stories</a>
+                    </li>
+                    <li onclick="closeNavbar()" class="hover:text-blue-600 transition-colors"><a href="#">Pricing</a>
+                    </li>
+                    <li onclick="closeNavbar()" class="hover:text-blue-600 transition-colors"><a href="#">Docs</a></li>
+                    
+                    <li class="md:hidden mt-4 w-full px-8">
+                        {% if session.get('user_id') %}
+                            <a href="/app" class="w-full block text-center py-3 !text-white bg-blue-600 hover:bg-blue-700 transition rounded-full font-medium mb-3">Open Translator</a>
+                            <button onclick="handleLogout()" class="w-full py-3 text-slate-700 bg-slate-100 hover:bg-slate-200 transition rounded-full font-medium border-none outline-none cursor-pointer">Logout</button>
+                        {% else %}
+                            <button onclick="closeNavbar(); showAuthScreen()" class="w-full py-3 text-white bg-blue-600 hover:bg-blue-700 transition rounded-full font-medium border-none outline-none cursor-pointer">Login</button>
+                        {% endif %}
+                    </li>
+
+                    <button id="close-menu"
+                        class="md:hidden bg-gray-800 hover:bg-black text-white p-2 rounded-md aspect-square font-medium transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6 6 18" />
+                            <path d="m6 6 12 12" />
+                        </svg>
+                    </button>
+                </ul>
+
+                <div class="flex items-center gap-4 md:hidden">
+                    {% if session.get('user_id') %}
+                        <a href="/app" class="px-5 py-2 text-sm !text-white bg-blue-600 hover:bg-blue-700 transition rounded-full">App</a>
+                    {% else %}
+                        <button onclick="showAuthScreen()" class="px-5 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 transition rounded-full border-none outline-none">Login</button>
+                    {% endif %}
+                    <button id="open-menu">
+                        <svg class="size-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+                {% if session.get('user_id') %}
+                    <div class="max-md:hidden flex items-center gap-3">
+                        <a href="/app" class="px-6 py-2.5 text-base !text-white bg-blue-600 hover:bg-blue-700 transition rounded-full">Open Translator</a>
+                        <button onclick="handleLogout()" class="px-6 py-2.5 text-base text-slate-700 bg-slate-100 hover:bg-slate-200 transition rounded-full border-none outline-none cursor-pointer">Logout</button>
+                    </div>
+                {% else %}
+                    <button onclick="showAuthScreen()"
+                        class="max-md:hidden px-6 py-3 text-base text-white bg-blue-600 hover:bg-blue-700 transition rounded-full border-none outline-none">
+                        Login
+                    </button>
+                {% endif %}
+            </nav>
+            <div class="flex flex-col-reverse gap-10 md:flex-row px-4 md:px-16 lg:px-24 xl:px-32 mt-12 md:mt-32">
+                <div class="max-md:text-center">
+                    <h5 class="text-4xl md:text-6xl/[76px] font-semibold max-w-xl text-slate-900 relative z-10">
+                        Making&nbsp;<span
+                            class="bg-gradient-to-r from-blue-700 to-blue-400 text-transparent bg-clip-text">communication</span>
+                        more accessible
+                    </h5>
+
+                    <p class="text-sm md:text-base max-w-lg mt-6 max-md:px-2 text-slate-600">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                        labore et dolore magna aliqua. Ut enim ad minim veniam dolor.
+                    </p>
+                    <div class="flex items-center gap-4 mt-6 max-md:justify-center">
+                        {% if session.get('user_id') %}
+                            <a href="/app" class="px-8 py-3 rounded-md bg-blue-600 hover:bg-blue-700 !text-white active:scale-95 transition-all shadow-md">
+                                Open Translator
+                            </a>
+                        {% else %}
+                            <button onclick="showAuthScreen()"
+                                class="px-8 py-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white active:scale-95 transition-all shadow-md border-none outline-none"
+                                type="button">
+                                Get Started
+                            </button>
+                        {% endif %}
+                        <button
+                            class="px-5 py-3 rounded-md bg-white text-blue-600 border border-blue-200 hover:border-blue-300 shadow-sm flex items-center gap-2 hover:bg-blue-50 active:scale-95 transition-all"
+                            type="button">
+                            <svg width="16" height="15" viewBox="0 0 16 15" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M6.68395 9.89231C6.62515 9.66436 6.50633 9.45634 6.33987 9.28988C6.17341 9.12341 5.96538 9.0046 5.73743 8.94579L1.69644 7.90377C1.6275 7.8842 1.56682 7.84267 1.52362 7.7855C1.48041 7.72832 1.45703 7.65861 1.45703 7.58694C1.45703 7.51527 1.48041 7.44556 1.52362 7.38839C1.56682 7.33121 1.6275 7.28969 1.69644 7.27012L5.73743 6.22743C5.9653 6.16868 6.17327 6.04997 6.33973 5.88363C6.50618 5.71729 6.62504 5.5094 6.68395 5.28157L7.72598 1.24058C7.74535 1.17137 7.78683 1.11039 7.84409 1.06695C7.90136 1.02351 7.97126 1 8.04313 1C8.11501 1 8.18491 1.02351 8.24217 1.06695C8.29943 1.11039 8.34092 1.17137 8.36029 1.24058L9.40166 5.28157C9.46046 5.50952 9.57928 5.71755 9.74574 5.88401C9.9122 6.05047 10.1202 6.16928 10.3482 6.22809L14.3892 7.26946C14.4587 7.28863 14.5199 7.33006 14.5636 7.38741C14.6073 7.44476 14.6309 7.51486 14.6309 7.58694C14.6309 7.65903 14.6073 7.72912 14.5636 7.78647C14.5199 7.84382 14.4587 7.88526 14.3892 7.90442L10.3482 8.94579C10.1202 9.0046 9.9122 9.12341 9.74574 9.28988C9.57928 9.45634 9.46046 9.66436 9.40166 9.89231L8.35963 13.9333C8.34026 14.0025 8.29878 14.0635 8.24151 14.1069C8.18425 14.1504 8.11435 14.1739 8.04247 14.1739C7.9706 14.1739 7.9007 14.1504 7.84344 14.1069C7.78617 14.0635 7.74469 14.0025 7.72532 13.9333L6.68395 9.89231Z"
+                                    stroke="#2563EB" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M13.3105 1.66016V4.29487" stroke="#2563EB" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M14.6328 2.97656H11.998" stroke="#2563EB" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M2.76953 10.8809V12.1982" stroke="#2563EB" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M3.42673 11.541H2.10938" stroke="#2563EB" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <span>About Us</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center mt-9 max-md:justify-center">
+                        <div class="flex -space-x-3.5 pr-3">
+                            <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200"
+                                alt="image"
+                                class="size-10 border-2 border-white rounded-full hover:-translate-y-px transition z-1">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200"
+                                alt="image"
+                                class="size-10 border-2 border-white rounded-full hover:-translate-y-px transition z-[2]">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&h=200&auto=format&fit=crop"
+                                alt="image"
+                                class="size-10 border-2 border-white rounded-full hover:-translate-y-px transition z-[3]">
+                            <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=60"
+                                alt="image"
+                                class="size-10 border-2 border-white rounded-full hover:-translate-y-px transition z-[4]">
+                            <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&auto=format&fit=crop&q=60"
+                                alt="image"
+                                class="size-10 border-2 border-white rounded-full hover:-translate-y-px transition z-[4]">
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-px">
+                                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M5.85536 0.463527C6.00504 0.00287118 6.65674 0.00287028 6.80642 0.463526L7.82681 3.60397C7.89375 3.80998 8.08572 3.94946 8.30234 3.94946H11.6044C12.0888 3.94946 12.2901 4.56926 11.8983 4.85397L9.22687 6.79486C9.05162 6.92219 8.97829 7.14787 9.04523 7.35388L10.0656 10.4943C10.2153 10.955 9.68806 11.338 9.2962 11.0533L6.62478 9.11244C6.44954 8.98512 6.21224 8.98512 6.037 9.11244L3.36558 11.0533C2.97372 11.338 2.44648 10.955 2.59616 10.4943L3.61655 7.35388C3.68349 7.14787 3.61016 6.92219 3.43491 6.79486L0.763497 4.85397C0.37164 4.56927 0.573027 3.94946 1.05739 3.94946H4.35944C4.57606 3.94946 4.76803 3.80998 4.83497 3.60397L5.85536 0.463527Z"
+                                        fill="#FF8F20" />
+                                </svg>
+                                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M5.85536 0.463527C6.00504 0.00287118 6.65674 0.00287028 6.80642 0.463526L7.82681 3.60397C7.89375 3.80998 8.08572 3.94946 8.30234 3.94946H11.6044C12.0888 3.94946 12.2901 4.56926 11.8983 4.85397L9.22687 6.79486C9.05162 6.92219 8.97829 7.14787 9.04523 7.35388L10.0656 10.4943C10.2153 10.955 9.68806 11.338 9.2962 11.0533L6.62478 9.11244C6.44954 8.98512 6.21224 8.98512 6.037 9.11244L3.36558 11.0533C2.97372 11.338 2.44648 10.955 2.59616 10.4943L3.61655 7.35388C3.68349 7.14787 3.61016 6.92219 3.43491 6.79486L0.763497 4.85397C0.37164 4.56927 0.573027 3.94946 1.05739 3.94946H4.35944C4.57606 3.94946 4.76803 3.80998 4.83497 3.60397L5.85536 0.463527Z"
+                                        fill="#FF8F20" />
+                                </svg>
+                                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M5.85536 0.463527C6.00504 0.00287118 6.65674 0.00287028 6.80642 0.463526L7.82681 3.60397C7.89375 3.80998 8.08572 3.94946 8.30234 3.94946H11.6044C12.0888 3.94946 12.2901 4.56926 11.8983 4.85397L9.22687 6.79486C9.05162 6.92219 8.97829 7.14787 9.04523 7.35388L10.0656 10.4943C10.2153 10.955 9.68806 11.338 9.2962 11.0533L6.62478 9.11244C6.44954 8.98512 6.21224 8.98512 6.037 9.11244L3.36558 11.0533C2.97372 11.338 2.44648 10.955 2.59616 10.4943L3.61655 7.35388C3.68349 7.14787 3.61016 6.92219 3.43491 6.79486L0.763497 4.85397C0.37164 4.56927 0.573027 3.94946 1.05739 3.94946H4.35944C4.57606 3.94946 4.76803 3.80998 4.83497 3.60397L5.85536 0.463527Z"
+                                        fill="#FF8F20" />
+                                </svg>
+                                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M5.85536 0.463527C6.00504 0.00287118 6.65674 0.00287028 6.80642 0.463526L7.82681 3.60397C7.89375 3.80998 8.08572 3.94946 8.30234 3.94946H11.6044C12.0888 3.94946 12.2901 4.56926 11.8983 4.85397L9.22687 6.79486C9.05162 6.92219 8.97829 7.14787 9.04523 7.35388L10.0656 10.4943C10.2153 10.955 9.68806 11.338 9.2962 11.0533L6.62478 9.11244C6.44954 8.98512 6.21224 8.98512 6.037 9.11244L3.36558 11.0533C2.97372 11.338 2.44648 10.955 2.59616 10.4943L3.61655 7.35388C3.68349 7.14787 3.61016 6.92219 3.43491 6.79486L0.763497 4.85397C0.37164 4.56927 0.573027 3.94946 1.05739 3.94946H4.35944C4.57606 3.94946 4.76803 3.80998 4.83497 3.60397L5.85536 0.463527Z"
+                                        fill="#FF8F20" />
+                                </svg>
+                                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M5.85536 0.463527C6.00504 0.00287118 6.65674 0.00287028 6.80642 0.463526L7.82681 3.60397C7.89375 3.80998 8.08572 3.94946 8.30234 3.94946H11.6044C12.0888 3.94946 12.2901 4.56926 11.8983 4.85397L9.22687 6.79486C9.05162 6.92219 8.97829 7.14787 9.04523 7.35388L10.0656 10.4943C10.2153 10.955 9.68806 11.338 9.2962 11.0533L6.62478 9.11244C6.44954 8.98512 6.21224 8.98512 6.037 9.11244L3.36558 11.0533C2.97372 11.338 2.44648 10.955 2.59616 10.4943L3.61655 7.35388C3.68349 7.14787 3.61016 6.92219 3.43491 6.79486L0.763497 4.85397C0.37164 4.56927 0.573027 3.94946 1.05739 3.94946H4.35944C4.57606 3.94946 4.76803 3.80998 4.83497 3.60397L5.85536 0.463527Z"
+                                        fill="#FF8F20" />
+                                </svg>
+                            </div>
+                            <p class="text-sm text-slate-500">Used by 1,000+ people</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block w-full md:max-w-xs lg:max-w-lg">
+                    <img class="w-full h-auto"
+                        src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/hero/users-group.png"
+                        alt="">
+                </div>
+            </div>
+        </section>
+
+        <script>
+            const menu = document.getElementById('menu');
+            const closeMenuBtn = document.getElementById('close-menu');
+            const openMenuBtn = document.getElementById('open-menu');
+
+            openMenuBtn.addEventListener('click', () => {
+                menu.classList.remove('max-md:-left-full');
+                menu.classList.add('max-md:left-0');
+            });
+
+            function closeNavbar() {
+                menu.classList.remove('max-md:left-0');
+                menu.classList.add('max-md:-left-full');
+            }
+
+            closeMenuBtn.addEventListener('click', () => {
+                closeNavbar();
+            });
+        </script>
+
+
+
+        <section class="flex flex-col items-center justify-center my-20 px-6">
+            <div class="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 rounded-full px-3 py-1">
+                <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M1.613 8.2a.62.62 0 0 1-.553-.341.59.59 0 0 1 .076-.637l6.048-6.118a.31.31 0 0 1 .375-.069c.061.033.11.084.137.147a.3.3 0 0 1 .014.197L6.537 4.991a.59.59 0 0 0 .07.552.61.61 0 0 0 .504.257h4.276a.62.62 0 0 1 .553.341.59.59 0 0 1-.076.637l-6.048 6.119a.31.31 0 0 1-.375.067.295.295 0 0 1-.15-.344l1.172-3.61a.59.59 0 0 0-.07-.553.61.61 0 0 0-.504-.257z"
+                        stroke="currentColor" stroke-miterlimit="5.759" stroke-linecap="round" />
+                </svg>
+                <span>Stay Updated</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-semibold text-gray-900 mt-4 text-center">Join SignTalk Pro today</h1>
+            <p class="max-w-lg text-center text-slate-600 mt-6">Join thousands of users who are already breaking
+                communication barriers, completely free to start.</p>
+            <form class="relative flex items-center rounded-md border border-slate-200 mt-6 text-sm max-w-md w-full">
+                <svg class="absolute left-3" width="19" height="17" viewBox="0 0 19 17" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 6 9.505 8.865a1 1 0 0 1-1.005 0L4 6" stroke="#90A1B9" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path
+                        d="M16.3 1H2.7C1.761 1 1 1.84 1 2.875v11.25C1 15.161 1.761 16 2.7 16h13.6c.939 0 1.7-.84 1.7-1.875V2.875C18 1.839 17.239 1 16.3 1"
+                        stroke="#90A1B9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <input type="email" name="email" placeholder="Enter your email"
+                    class="border-none outline-none focus:outline-none pl-10 py-5 bg-transparent w-full" required>
+                <button
+                    class="shrink-0 mr-2 px-6 py-3 text-sm bg-gradient-to-r from-blue-600 to-blue-800 rounded-md hover:opacity-90 active:scale-95 transition duration-300 text-white border-none outline-none">
+                    Subscribe now
+                </button>
+            </form>
+        </section>
+
+        <footer
+            class="bg-white w-full text-black mt-12 pt-8 lg:pt-12 px-4 sm:px-8 md:px-16 lg:px-28 overflow-hidden border-t border-neutral-200">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-6 gap-8 md:gap-12">
+
+                <div class="lg:col-span-3 space-y-6">
+                    <a href="#" class="block">
+                        <img src="{{ url_for('static', filename='images/others/logo.png') }}" alt="SignTalk Pro Logo"
+                            class="h-10">
+                    </a>
+                    <p class="text-sm/6 text-slate-600 max-w-96">SignTalk Pro helps you communicate effortlessly by
+                        translating voice to sign language in real-time, making the world more accessible.</p>
+                    <div class="flex gap-5 md:gap-6 order-1 md:order-2">
+                        <!-- Twitter -->
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+                            </svg>
+                        </a>
+                        <!-- Github -->
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+                                <path d="M9 18c-4.51 2-5-2-7-2" />
+                            </svg>
+                        </a>
+                        <!-- Linkedin -->
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                                <rect width="4" height="12" x="2" y="9" />
+                                <circle cx="4" cy="4" r="2" />
+                            </svg>
+                        </a>
+                        <!-- Youtube -->
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+                                <path d="m10 15 5-3-5-3z" />
+                            </svg>
+                        </a>
+                        <!-- Instagram -->
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 lg:gap-28 items-start">
+                    <!-- Products -->
+                    <div>
+                        <h3 class="font-medium text-sm mb-4">Products</h3>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">Web App</a></li>
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">Mobile App</a></li>
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">API</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Resources -->
+                    <div>
+                        <h3 class="font-medium text-sm mb-4">Resources</h3>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">Documentation</a></li>
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">Tutorials</a></li>
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">Blog</a></li>
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">Community</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Company -->
+                    <div class="col-span-2 md:col-span-1">
+                        <h3 class="font-medium text-sm mb-4">Company</h3>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">About</a></li>
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">Vision</a></li>
+                            <li class="flex items-center gap-2">
+                                <a href="#" class="hover:text-blue-600 transition-colors">Careers</a>
+                                <span
+                                    class="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700">HIRING</span>
+                            </li>
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">Privacy policy</a></li>
+                            <li><a href="#" class="hover:text-blue-600 transition-colors">Contact Us</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto mt-12 pt-4 border-t border-neutral-300 flex justify-between items-center">
+                <p class="text-slate-600 text-sm">© 2026 SignTalk Pro</p>
+                <p class='text-sm text-slate-600'>All rights reserved.</p>
+            </div>
+            <div class="relative">
+                <div
+                    class="absolute inset-x-0 bottom-0 mx-auto w-full max-w-3xl h-full max-h-64 bg-slate-100 rounded-full blur-[100px] pointer-events-none">
+                </div>
+                <h1
+                    class="text-center font-extrabold leading-[0.7] text-transparent text-[clamp(2.5rem,10vw,15rem)] [-webkit-text-stroke:1.5px_#2563EB] opacity-15 mt-10">
+                    SignTalk Pro
+                </h1>
+            </div>
+        </footer>
+    </div>
+
+    {% include 'auth_modal.html' %}
+    <script>
+        async function handleLogout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.reload();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>

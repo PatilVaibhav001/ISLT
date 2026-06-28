@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignTalk Pro — Voice to Sign Language Translator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Outfit:wght@100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: {
+                preflight: false,
+            }
+        }
+    </script>
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="{{ url_for('static', filename='favicon/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32"
+        href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16"
+        href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='favicon/site.webmanifest') }}">
+</head>
+
+<body>
+
+    {% include 'auth_modal.html' %}
+
+    <!-- ═══════════════════════ APP SHELL ═══════════════════════ -->
+    <div class="app-shell" id="app-shell" style="display:none;">
+
+        <!-- ═══════════════════════ TOP NAVBAR ═══════════════════════ -->
+        <nav class="top-navbar">
+            <div class="navbar-left">
+                <a href="/">
+                    <img src="{{ url_for('static', filename='images/others/logo.png') }}" alt="SignTalk Pro Logo" class="nav-logo">
+                </a>
+            </div>
+            <div class="navbar-right" style="display:flex; align-items:center;">
+                <span class="nav-welcome">Welcome, <span id="nav-username">Guest</span></span>
+                <button id="mobile-menu-btn" class="mobile-menu-btn">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- ═══════════════════════ APP BODY ═══════════════════════ -->
+        <div class="app-body">
+            <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+            <aside class="sidebar">
+                <div class="user-card" id="user-card-btn">
+                    <img src="{{ url_for('static', filename='images/others/profilepic.png') }}" alt="User Avatar"
+                        class="sidebar-avatar-img">
+                    <div class="user-name" id="sidebar-username">Guest User</div>
+                </div>
+
+                <div class="goal-card">
+                    <div class="goal-top">
+                        <span>Daily Goal</span>
+                        <span id="goal-count">0/10</span>
+                    </div>
+                    <div class="goal-bar">
+                        <div class="goal-fill" id="goal-fill" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <nav class="nav-list">
+                    <button class="nav-item active" data-tab="translator">Translator</button>
+                    <button class="nav-item" data-tab="history">History</button>
+                    <button class="nav-item" data-tab="favorites">Favorites</button>
+                    <button class="nav-item" data-tab="quiz">Practice Quiz</button>
+                    <button class="nav-item" data-tab="achievements">Achievements</button>
+                    <button class="nav-item" data-tab="profile">Profile</button>
+                    <button class="nav-item" data-tab="settings">Settings</button>
+                </nav>
+
+                <div class="divider"></div>
+
+                <div class="sidebar-bottom">
+                    <button class="btn-logout" id="btn-logout">⏻ Log Out</button>
+                </div>
+            </aside>
+
+            <!-- ═══════════════════════ MAIN CONTENT ═══════════════════════ -->
+            <main class="main-content">
+
+                <!-- ── TRANSLATOR TAB ──────────────────────────────────────── -->
+                <section class="tab-panel active" id="tab-translator">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h1>Translator</h1>
+                            <p class="subtitle">Type or speak — see it in signs instantly</p>
+                        </div>
+                        <div class="page-header-right">
+                            <div class="mode-pill">
+                                <button class="mode-btn active" id="btn-isl" data-mode="ISL">IN ISL</button>
+                                <button class="mode-btn" id="btn-asl" data-mode="ASL">US ASL</button>
+                            </div>
+                            <div class="stat-chip"><img src="{{ url_for('static', filename='images/others/rise.png') }}"
+                                    alt="Stats" style="width:16px;height:16px;margin-right:6px;"><span
+                                    id="stat-count">0</span> translations</div>
+                        </div>
+                    </div>
+
+                    <div class="translator-body">
+
+                        <!-- LEFT PANEL -->
+                        <div class="panel left-panel">
+                            <div class="panel-row">
+                                <span class="panel-label">Text Input</span>
+                                <button class="link-btn" id="btn-clear-text"
+                                    style="background:none;padding:0;border:none;display:flex;align-items:center;justify-content:center;"><img
+                                        src="{{ url_for('static', filename='images/others/eraser.png') }}"
+                                        style="width:20px;height:20px;" alt="Clear"></button>
+                            </div>
+                            <textarea id="text-input" placeholder="Type a word or sentence, or use the mic..."
+                                rows="5"></textarea>
+
+                            <div class="input-row">
+                                <button class="btn-primary" id="btn-translate">Translate to Signs</button>
+                                <button class="btn-icon btn-mic" id="btn-mic" title="Voice input"><img
+                                        src="{{ url_for('static', filename='images/others/voice.png') }}"
+                                        style="width:22px;height:22px;" alt="Mic"></button>
+                            </div>
+                            <div class="mic-status" id="mic-status"></div>
+
+                            <div class="speed-card">
+                                <div class="speed-top">
+                                    <span class="speed-label">Animation Speed</span>
+                                    <span id="speed-value">1.0s</span>
+                                </div>
+                                <input type="range" id="speed-slider" min="0.3" max="2.5" step="0.1" value="1.0">
+                            </div>
+
+                            <div class="action-row">
+                                <button class="btn-stop" id="btn-stop">Stop</button>
+                                <button class="btn-icon btn-star" id="btn-favorite" title="Save to favorites"><img
+                                        src="{{ url_for('static', filename='images/others/star.png') }}"
+                                        style="width:24px;height:24px;" alt="Star"></button>
+                                <button class="btn-icon btn-gif" id="btn-gif" title="Export as GIF"><img
+                                        src="{{ url_for('static', filename='images/others/export.png') }}"
+                                        style="width:22px;height:22px;" alt="Export"></button>
+                            </div>
+                            <div class="gif-status" id="gif-status"></div>
+                        </div>
+
+                        <!-- RIGHT PANEL -->
+                        <div class="panel right-panel">
+                            <div class="panel-row">
+                                <span class="panel-label">Sign Display</span>
+                                <span class="status-dot" id="status-indicator" style="display:none;"></span>
+                            </div>
+
+                            <div class="sign-display" id="sign-display">
+                                <div class="sign-placeholder" id="sign-placeholder">
+                                    <div class="placeholder-text">Ready to translate</div>
+                                    <div class="placeholder-sub">Type text on the left and click Translate</div>
+                                </div>
+                                <img id="sign-image" class="sign-image" style="display:none;" crossorigin="anonymous">
+                                <div class="sign-letter" id="sign-letter"></div>
+                            </div>
+
+                            <div class="progress-row" id="progress-row" style="display:none;">
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" id="progress-fill"></div>
+                                </div>
+                                <div class="progress-caption" id="progress-caption"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ── HISTORY TAB ──────────────────────────────────────────── -->
+                <section class="tab-panel" id="tab-history">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h1>Translation History</h1>
+                            <p class="subtitle">All your past sign language translations</p>
+                        </div>
+                        <button class="link-btn" id="btn-clear-history"
+                            style="display:flex; align-items:center; gap:6px; font-size:14px; padding:8px 12px;"><img
+                                src="{{ url_for('static', filename='images/others/eraser.png') }}"
+                                style="width:18px;height:18px;" alt="Clear"> Clear All</button>
+                    </div>
+                    <div class="list-card" id="history-list">
+                        <div class="empty-state">No translations yet — go try the Translator!</div>
+                    </div>
+                </section>
+
+                <!-- ── FAVORITES TAB ────────────────────────────────────────── -->
+                <section class="tab-panel" id="tab-favorites">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h1>Favorites</h1>
+                            <p class="subtitle">Your saved phrases for quick access</p>
+                        </div>
+                        <button class="link-btn" id="btn-clear-favorites"
+                            style="display:flex; align-items:center; gap:6px; font-size:14px; padding:8px 12px;"><img
+                                src="{{ url_for('static', filename='images/others/eraser.png') }}"
+                                style="width:18px;height:18px;" alt="Clear"> Clear All</button>
+                    </div>
+                    <div class="list-card" id="favorites-list">
+                        <div class="empty-state">No favorites saved yet.</div>
+                    </div>
+                </section>
+
+                <!-- ── QUIZ TAB ─────────────────────────────────────────────── -->
+                <section class="tab-panel" id="tab-quiz">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h1>Practice Quiz</h1>
+                            <p class="subtitle">Guess the letter from the sign — test yourself!</p>
+                        </div>
+                        <div class="mode-pill">
+                            <button class="mode-btn active" id="quiz-btn-isl" data-mode="ISL">🇮🇳 ISL</button>
+                            <button class="mode-btn" id="quiz-btn-asl" data-mode="ASL">🇺🇸 ASL</button>
+                        </div>
+                    </div>
+
+                    <div class="panel quiz-panel" id="quiz-panel">
+                        <div class="quiz-start" id="quiz-start" style="text-align: center; padding: 40px 0;">
+                            <img src="{{ url_for('static', filename='images/others/thinking.png') }}"
+                                style="width:64px;height:64px; margin-bottom: 16px;" alt="Thinking">
+                            <div style="font-size: 24px; color: #475569; font-weight: 300; margin-bottom: 12px;">Ready
+                                to test your knowledge?</div>
+                            <p style="font-size: 15px; color: var(--text-muted); margin-bottom: 24px;">10 questions,
+                                multiple choice. No accuracy tracking — just your score!</p>
+                            <button class="btn-primary" id="btn-quiz-start"
+                                style="padding: 14px 40px; font-size: 16px; border-radius: 12px; width: auto; font-weight: 600;">Start
+                                Quiz</button>
+                        </div>
+
+                        <div class="quiz-active" id="quiz-active" style="display:none;">
+                            <div class="quiz-top">
+                                <span id="quiz-progress"
+                                    style="font-size:16px; font-weight:700; color:var(--text-main);">Question 1 of
+                                    10</span>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <img src="{{ url_for('static', filename='images/others/score.png') }}"
+                                        style="width:20px;height:20px;" alt="Score">
+                                    <span style="font-size:16px; font-weight:700; color:#475569;" id="quiz-score">Score:
+                                        0</span>
+                                </div>
+                            </div>
+                            <div class="quiz-image-box">
+                                <img id="quiz-image" class="quiz-image">
+                            </div>
+                            <div class="quiz-options" id="quiz-options"></div>
+                            <div class="quiz-feedback" id="quiz-feedback"></div>
+                        </div>
+
+                        <div class="quiz-result" id="quiz-result" style="display:none;">
+                            <div class="placeholder-icon" id="quiz-result-icon">🎉</div>
+                            <div class="placeholder-text" id="quiz-result-text">Quiz Complete!</div>
+                            <div class="quiz-final-score" id="quiz-final-score">Score: 0 / 10</div>
+                            <button class="btn-primary" id="btn-quiz-again">🔄 Try Again</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ── ACHIEVEMENTS TAB ─────────────────────────────────────── -->
+                <section class="tab-panel" id="tab-achievements">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h1>Achievements</h1>
+                            <p class="subtitle">Badges you've earned along the way</p>
+                        </div>
+                    </div>
+                    <div class="achievements-grid" id="achievements-grid">
+                        <div class="empty-state">Log in to start earning achievements!</div>
+                    </div>
+                </section>
+
+                <!-- ── PROFILE TAB ──────────────────────────────────────────── -->
+                <section class="tab-panel" id="tab-profile">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h1>Profile</h1>
+                            <p class="subtitle">Your account and stats</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <img src="{{ url_for('static', filename='images/others/profilepic.png') }}"
+                            class="profile-avatar" id="profile-avatar" alt="Profile Picture">
+                        <div class="profile-name" id="profile-name">Guest User</div>
+                        <div class="profile-since" id="profile-since"></div>
+                    </div>
+
+                    <div class="stats-grid" id="profile-stats">
+                        <div class="stat-card">
+                            <div class="stat-card-icon"><img
+                                    src="{{ url_for('static', filename='images/others/progress.png') }}"
+                                    style="width:36px;height:36px;" alt="Translations"></div>
+                            <div class="stat-card-value" id="stat-history">0</div>
+                            <div class="stat-card-label">Translations</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon"><img
+                                    src="{{ url_for('static', filename='images/others/star.png') }}"
+                                    style="width:36px;height:36px;" alt="Favorites"></div>
+                            <div class="stat-card-value" id="stat-favorites">0</div>
+                            <div class="stat-card-label">Favorites</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon"><img
+                                    src="{{ url_for('static', filename='images/others/thinking.png') }}"
+                                    style="width:36px;height:36px;" alt="Quizzes Taken"></div>
+                            <div class="stat-card-value" id="stat-quizzes">0</div>
+                            <div class="stat-card-label">Quizzes Taken</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon"><img
+                                    src="{{ url_for('static', filename='images/others/scoreboard.png') }}"
+                                    style="width:36px;height:36px;" alt="Best Quiz Score"></div>
+                            <div class="stat-card-value" id="stat-best-quiz">0</div>
+                            <div class="stat-card-label">Best Quiz Score</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon"><img
+                                    src="{{ url_for('static', filename='images/others/trophy.png') }}"
+                                    style="width:36px;height:36px;" alt="Achievements"></div>
+                            <div class="stat-card-value" id="stat-achievements">0</div>
+                            <div class="stat-card-label">Achievements</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ── SETTINGS TAB ─────────────────────────────────────────── -->
+                <section class="tab-panel" id="tab-settings">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h1>Settings</h1>
+                            <p class="subtitle">Customize how SignTalk Pro works for you</p>
+                        </div>
+                    </div>
+
+                    <div class="panel settings-panel">
+                        <div class="settings-row">
+                            <div style="display:flex; gap:16px; align-items:center;">
+                                <img src="{{ url_for('static', filename='images/others/speaker-filled-audio-tool.png') }}"
+                                    style="width:32px;height:32px; opacity:0.8;" alt="Sound">
+                                <div>
+                                    <div class="settings-label">Sound Effects</div>
+                                    <div class="settings-desc">Play a sound on translation complete</div>
+                                </div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="setting-sound" checked>
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="settings-row">
+                            <div style="display:flex; gap:16px; align-items:center;">
+                                <img src="{{ url_for('static', filename='images/others/interface.png') }}"
+                                    style="width:32px;height:32px; opacity:0.8;" alt="Mode">
+                                <div>
+                                    <div class="settings-label">Default Sign Mode</div>
+                                    <div class="settings-desc">Mode selected when you open the app</div>
+                                </div>
+                            </div>
+                            <div class="mode-pill" style="margin:0;">
+                                <button class="mode-btn active" id="setting-mode-isl" data-mode="ISL">IN ISL</button>
+                                <button class="mode-btn" id="setting-mode-asl" data-mode="ASL">US ASL</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row settings-row-col">
+                            <div style="display:flex; gap:16px; align-items:center;">
+                                <img src="{{ url_for('static', filename='images/others/speed.png') }}"
+                                    style="width:32px;height:32px; opacity:0.8;" alt="Speed">
+                                <div>
+                                    <div class="settings-label">Default Animation Speed</div>
+                                    <div class="settings-desc">Used as the starting speed each visit</div>
+                                </div>
+                            </div>
+                            <div class="speed-card" style="width:200px; margin:0; padding:12px 16px;">
+                                <div class="speed-top">
+                                    <span>Speed</span>
+                                    <span id="setting-speed-value">1.0s</span>
+                                </div>
+                                <input type="range" id="setting-speed-slider" min="0.3" max="2.5" step="0.1"
+                                    value="1.0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; max-width:700px; margin-top:24px;">
+                        <button class="btn-primary" id="btn-save-settings"
+                            style="padding:14px 40px; font-size:16px; border-radius:12px; font-weight:600;">Save</button>
+                    </div>
+                    <div class="settings-saved-msg" id="settings-saved-msg" style="max-width:700px; text-align:right;">
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>
