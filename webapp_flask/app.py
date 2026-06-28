@@ -8,7 +8,13 @@ Run with: python app.py
 Then open: http://localhost:5000
 """
 
+import sys
 import os
+
+# Ensure the current directory is in the path for Vercel
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(BASE_DIR)
+
 import random
 import string
 from functools import wraps
@@ -17,7 +23,9 @@ from flask import Flask, render_template, request, jsonify, session
 
 import database as db
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            template_folder=os.path.join(BASE_DIR, "templates"),
+            static_folder=os.path.join(BASE_DIR, "static"))
 app.secret_key = os.environ.get("SIGNTALK_SECRET_KEY", "dev-secret-key-change-in-production")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
