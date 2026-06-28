@@ -59,6 +59,19 @@ body {
     font-size: 15px;
     font-weight: 500;
     color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    margin-left: 4px;
+}
+
+#nav-username {
+    display: inline-block;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+    margin-left: 4px;
 }
 
 .app-body {
@@ -595,6 +608,18 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
+    .top-navbar {
+        padding: 0 16px;
+    }
+
+    .nav-logo {
+        height: 26px;
+    }
+
+    #nav-username {
+        max-width: 80px;
+    }
+
     .sidebar {
         display: none;
         position: fixed;
@@ -603,6 +628,8 @@ input[type="range"]::-webkit-slider-thumb {
         height: calc(100vh - 70px);
         z-index: 1000;
         box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        overflow-y: auto;
+        padding-bottom: 20px;
     }
     
     .sidebar.mobile-open {
