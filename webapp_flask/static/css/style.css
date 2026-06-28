@@ -24,7 +24,7 @@
     box-sizing: border-box;
 }
 
-body, html {
+body {
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg-deep);
     color: var(--text-main);
@@ -625,33 +625,12 @@ input[type="range"]::-webkit-slider-thumb {
         position: fixed;
         left: 0;
         top: 70px;
-        bottom: 0;
-        height: auto;
+        /* height of top-navbar */
+        height: calc(100vh - 70px);
         z-index: 1000;
         box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
         overflow-y: auto;
-        padding-top: 10px;
-        padding-bottom: 10px;
-    }
-
-    .user-card {
-        margin-bottom: 10px;
-    }
-
-    .goal-card {
-        margin-bottom: 10px;
-    }
-
-    .divider {
-        margin: 5px 14px;
-    }
-
-    .nav-item {
-        height: 40px;
-    }
-
-    .sidebar-bottom {
-        padding: 5px 20px 10px;
+        padding-bottom: 20px;
     }
 
     .sidebar.mobile-open {
@@ -1302,6 +1281,39 @@ input[type="range"]::-webkit-slider-thumb {
     }
 }
 
-body.no-scroll {
-    overflow: hidden;
+margin-top: 12px;
+}
+
+/* ── Responsive additions ── */
+@media (max-width: 900px) {
+    .quiz-options {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.quiz-options {
+    grid-template-columns: 1fr 1fr;
+}
+
+.achievements-grid {
+    grid-template-columns: 1fr;
+}
+}
+
+margin-top: 12px;
+}
+
+/* ── Responsive additions ── */
+@media (max-width: 900px) {
+    .quiz-options {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
 }
