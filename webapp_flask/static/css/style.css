@@ -625,7 +625,8 @@ input[type="range"]::-webkit-slider-thumb {
         position: fixed;
         left: 0;
         top: 70px; /* height of top-navbar */
-        height: calc(100vh - 70px);
+        bottom: 0;
+        height: auto;
         z-index: 1000;
         box-shadow: 4px 0 15px rgba(0,0,0,0.1);
         overflow-y: auto;
